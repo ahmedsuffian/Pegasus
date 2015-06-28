@@ -1,0 +1,289 @@
+<%@ page language="java" contentType="text/html; charset=US-ASCII" pageEncoding="US-ASCII"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Pegasus</title>
+        <link href="templatemo_style.css" rel="stylesheet" type="text/css" />
+        <link href="css/jquery.ennui.contentslider.css" rel="stylesheet" type="text/css" media="screen,projection" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <link rel="icon" href="images/icon.ico" type="image/x-icon" />
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"/>
+        <script src="https://code.jquery.com/jquery.js"></script>
+        <script src="http://code.jquery.com/qunit/qunit-1.10.0.js"></script>
+            
+        <script type="text/javascript">
+  
+            var firstTime = 1;
+            
+            function getCompleteReport () {
+                
+                $.ajax({
+                    url: "MainServlet",
+                    type: "GET",
+                    data: {
+                        action: 'getCompleteReport',
+                    },
+                    success: function (output) {
+                        console.log (output);
+                        $("#tableDiv").empty ();
+                        $("#tableDiv").append(output);
+                        firstTime = 1;
+                        
+                        $("#goLiveButton").show ();
+                        $("#completeSearchBtn").hide ();
+                    },
+                    error: function () {
+                        console.log("error while querying database.");
+                        
+                    }
+                });
+                
+            }
+
+            function getDepartmentReport () {
+    
+                $.ajax({
+                    url: "MainServlet",
+                    type: "GET",
+                    data: {
+                        action: 'getDepartmentReport',
+                        filter: $("#departmentSearchField").val(),
+                    },
+                    success: function (output) {
+                        console.log (output);
+                        $("#tableDiv").empty ();
+                        $("#tableDiv").append(output);
+                        firstTime = 1;
+                    },
+                    error: function () {
+                        console.log("error while querying database.");
+                    }
+                });
+            }
+
+    
+            function getClientReport () {
+    
+                $.ajax({
+                    url: "MainServlet",
+                    type: "GET",
+                    data: {
+                        action: 'getClientReport',
+                        filter: $("#clientSearchField").val()
+                    },
+                    success: function (output) {
+                        console.log (output);
+                        $("#tableDiv").empty ();
+                        $("#tableDiv").append(output);
+                        firstTime = 1;
+                    },
+                    error: function () {
+                        console.log("error while querying database.");
+                    }
+                });
+            }
+            
+    
+            function checkUpdates () {
+                $.ajax({
+                    url: "MainServlet",
+                    type: "GET",
+                    data: {
+                        action: 'checkUpdates',
+                    },
+                    success: function (output) {
+                        console.log (output);
+                        if (output == "true") {
+                            fetchResults ();
+                        }
+                    },
+                    error: function () {
+                        console.log("error while querying database.");
+                    }
+                });
+            }
+
+            function fetchResults() {
+                $.ajax({
+                    url: "MainServlet",
+                    type: "GET",
+                    data: {
+                        action: 'fetchUpdates'
+                    },
+                    success: function (output) {
+                        console.log(output);
+                        console.log ($("#recordsTable") );
+                        if (firstTime == 0) {
+ 
+                            $("#recordsTable").append (output);
+                        }
+                        else {            
+                            $("#tableDiv").empty();
+                            $("#tableDiv").append(output);
+                            firstTime = 0;
+                        }
+                        $("#goLiveButton").hide ();
+                        $("#completeSearchBtn").show ();
+
+                    },
+                    error: function () {
+                        console.log("error while querying database.");
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                $("#goLiveButton").click (fetchResults);
+                $("#completeSearchBtn").click (getCompleteReport);
+                $ ("#clientSearchBtn").click (getClientReport);
+                $("#departmentSearchBtn").click (getDepartmentReport);
+                $("#goLiveButton").hide ();
+                console.log ($("goLiveButton"));
+                setInterval(checkUpdates, 1000);
+            });
+
+        </script>
+
+        
+        
+        <script language="javascript" type="text/javascript">
+            function clearText(field)
+            {
+                if (field.defaultValue == field.value)
+                    field.value = '';
+                else if (field.value == '')
+                    field.value = field.defaultValue;
+            }
+        </script>
+    </head>
+    <body>
+        
+         <% 
+            String userName = null;
+            int check = 0;
+            Cookie [] cookies =  request.getCookies ();
+            if (cookies != null) {
+                for (Cookie cookie: cookies)
+                    if (cookie.getName().equals ("user")) {
+                        userName = cookie.getValue ();
+                        check = 1;
+                    }
+            }
+            
+            if (check == 0)
+            {
+                response.setStatus(response.SC_MOVED_TEMPORARILY);
+                response.setHeader("Location", "index.jsp");
+            }
+
+        %>
+        
+
+        <div id="templatemo_wrapper">
+
+            <div id="templatemo_header">
+
+                <div id="site_title">
+                    <h1><a href="#" target="_parent">
+                            <img src="images/logo.PNG" alt="Site Title" width="200" height="50" />
+                            <span>Security you need</span>
+                        </a></h1>
+                </div>
+
+                <div id="search_box">
+                    <form action="#" method="get">
+                        <input type="text" value="Enter a keyword here..." name="q" size="10" id="searchfield" title="searchfield" onfocus="clearText(this)" onblur="clearText(this)" />
+                        <input type="submit" name="Search" value="Search" alt="Search" id="searchbutton" title="Search" />
+                    </form>
+                </div>
+
+                <div class="cleaner"></div>
+            </div> <!-- end of header -->
+
+
+            <div id="templatemo_menu">
+
+                <ul>
+                    <li><a href="index.html" class="current">Admin's Panel</a></li>
+                </ul>       
+
+            </div> <!-- end of templatemo_menu -->
+
+            <div id="templatemo_content_wrapper"><span class="top"></span><span class="bottom"></span>
+                <div id="templatemo_content" style = "padding:20px">
+
+                    <h2>Pegasus Admin's panel</h2>
+
+                    <div id="tableDiv">
+                        
+
+                    </div>
+                </div> <!-- end of templatemo_content -->
+
+                <div id="templatemo_sidebar">
+
+                    <div class="section_rss_twitter">
+
+                        <div >
+                            <h1 style = "color: #FFFFFF"> Search Tools</h1>
+                        </div>
+                        
+                        <div class="margin_bottom_20"></div>
+
+                        <div>
+                            <button id ="completeSearchBtn"> View Complete report </button>
+                        </div>
+                        
+                        <div>
+                            <button id ="goLiveButton"> Go Live! </button>
+                        </div>
+
+                        <div class="margin_bottom_20"></div>
+
+                        <div>
+                            Search by Client Name:
+                            <input type = "text" id = "clientSearchField"></input>
+                            <button id ="clientSearchBtn"> Search </button>
+                        </div>
+
+                 
+
+                        
+                        <div class="margin_bottom_20"></div>
+
+                        <div>
+                            Search by Department Name:
+                            <input type = "text"  id = "departmentSearchField"></input>
+                            <button id ="departmentSearchBtn"> Search </button>
+                        </div>
+                        
+                         <div class="margin_bottom_20"></div>
+
+                        
+                    </div>
+
+                    <div class="cleaner"></div>
+                </div>
+
+                <div class="cleaner"></div>
+            </div> <!-- end of content_wrapper -->
+
+            <div id="templatemo_footer">
+
+                <ul class="footer_menu">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+
+                Copyright ?? 2048 <a href="#">Your Company Name</a> | 
+                <a href="http://www.iwebsitetemplate.com" target="_parent">Website Templates</a> by <a href="http://www.templatemo.com" target="_parent">Free CSS Templates</a>
+
+            </div> <!-- end of footer -->
+
+        </div> <!-- end of wrapper -->
+
+        <div align=center>This template  downloaded form <a href='http://all-free-download.com/free-website-templates/'>free website templates</a></div></body>
+</html>
